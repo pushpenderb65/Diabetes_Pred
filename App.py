@@ -9,7 +9,7 @@ import streamlit as st
 # Page config
 # ------------------------------------------------------------------
 st.set_page_config(
-    page_title="Diabetes Risk Predictor",
+    page_title="Diabetes Risk Predictor By Pushpender",
     page_icon="🩺",
     layout="centered",
     initial_sidebar_state="expanded",
