@@ -1,13 +1,15 @@
+
 import joblib
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
 
 # ------------------------------------------------------------------
 # Page config
 # ------------------------------------------------------------------
 st.set_page_config(
-    page_title="Diabetes Risk Predictor Deploy By Pushpender",
+    page_title="Diabetes Risk Predictor",
     page_icon="🩺",
     layout="centered",
     initial_sidebar_state="expanded",
@@ -298,7 +300,82 @@ if predict_clicked:
     m1, m2 = st.columns(2)
     m1.metric("Diabetes Probability", f"{proba:.1%}")
     m2.metric("Threshold Used", f"{threshold:.2f}")
-    st.progress(min(max(proba, 0.0), 1.0))
+
+    # ---------------- Gauge chart: risk probability ----------------
+    gauge_color = "#dc2626" if prediction == 1 else "#16a34a"
+    gauge_fig = go.Figure(
+        go.Indicator(
+            mode="gauge+number",
+            value=proba * 100,
+            number={"suffix": "%", "font": {"size": 34, "color": gauge_color}},
+            gauge={
+                "axis": {"range": [0, 100], "tickcolor": "#94a3b8"},
+                "bar": {"color": gauge_color, "thickness": 0.28},
+                "bgcolor": "white",
+                "borderwidth": 0,
+                "steps": [
+                    {"range": [0, 30], "color": "#dcfce7"},
+                    {"range": [30, 60], "color": "#fef9c3"},
+                    {"range": [60, 100], "color": "#fee2e2"},
+                ],
+                "threshold": {
+                    "line": {"color": "#1e293b", "width": 3},
+                    "thickness": 0.8,
+                    "value": threshold * 100,
+                },
+            },
+        )
+    )
+    gauge_fig.update_layout(
+        height=260,
+        margin=dict(t=20, b=10, l=30, r=30),
+        paper_bgcolor="rgba(0,0,0,0)",
+        font={"color": "#1e293b", "family": "sans-serif"},
+    )
+    st.plotly_chart(gauge_fig, use_container_width=True)
+
+    # ---------------- Bar chart: vitals vs normal range ----------------
+    st.markdown("#### 🔬 Aapke Vitals vs Normal Range")
+
+    vitals_df = pd.DataFrame(
+        {
+            "Metric": ["BMI", "HbA1c (%)", "Glucose (mg/dL)"],
+            "Aapki Value": [bmi, hba1c, glucose],
+            "Normal Upper Limit": [25.0, 5.7, 140],
+        }
+    )
+
+    bar_fig = go.Figure()
+    bar_fig.add_trace(
+        go.Bar(
+            x=vitals_df["Metric"],
+            y=vitals_df["Aapki Value"],
+            name="Aapki Value",
+            marker_color="#2563eb",
+            text=vitals_df["Aapki Value"],
+            textposition="outside",
+        )
+    )
+    bar_fig.add_trace(
+        go.Bar(
+            x=vitals_df["Metric"],
+            y=vitals_df["Normal Upper Limit"],
+            name="Normal Upper Limit",
+            marker_color="#94a3b8",
+            text=vitals_df["Normal Upper Limit"],
+            textposition="outside",
+        )
+    )
+    bar_fig.update_layout(
+        barmode="group",
+        height=320,
+        margin=dict(t=30, b=10, l=10, r=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        font={"color": "#1e293b", "family": "sans-serif"},
+    )
+    st.plotly_chart(bar_fig, use_container_width=True)
 
     st.info(
         "ℹ️ Ye prediction ek machine learning model ka estimate hai, "
