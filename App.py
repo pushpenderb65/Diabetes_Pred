@@ -254,7 +254,7 @@ if predict_clicked:
 
     with st.spinner("Model analyzing your data..."):
         X_input = preprocess_input(raw_input, training_columns, scaler)
-        proba = model.predict_proba(X_input)[0, 1]
+        proba = float(model.predict_proba(X_input)[0, 1])  # numpy float32 -> python float
         prediction = int(proba >= threshold)
 
     st.markdown("### 📈 Result")
