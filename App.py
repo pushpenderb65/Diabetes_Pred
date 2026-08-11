@@ -7,7 +7,7 @@ import streamlit as st
 # Page config
 # ------------------------------------------------------------------
 st.set_page_config(
-    page_title="Diabetes Risk Predictor",
+    page_title="Diabetes Risk Predictor Deploy By Pushpender",
     page_icon="🩺",
     layout="centered",
     initial_sidebar_state="expanded",
@@ -132,9 +132,9 @@ model, scaler, training_columns = load_artifacts()
 with st.sidebar:
     st.markdown("### 🩺 About")
     st.write(
-        "Ye app ek **XGBoost** classifier use karta hai jo class-imbalance "
-        "handle karne ke liye `scale_pos_weight` (balanced) ke saath train "
-        "kiya gaya hai."
+        "Apni basic health details daalkar turant jaanein ki aapko "
+        "diabetes ka risk kitna ho sakta hai — AI model ke through "
+        "kuch second me analysis."
     )
     st.markdown("---")
     st.markdown("### 📋 Kaise use karein")
@@ -196,9 +196,23 @@ st.markdown("</div>", unsafe_allow_html=True)
 st.markdown('<div class="section-card">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">📊 Vitals</div>', unsafe_allow_html=True)
 
-col6, col7, col8 = st.columns(3)
-with col6:
+know_bmi = st.checkbox("Mujhe apna BMI pata hai", value=True)
+
+if know_bmi:
     bmi = st.number_input("BMI", min_value=10.0, max_value=70.0, value=22.0, step=0.1)
+else:
+    st.caption("BMI pata nahi? Height aur weight daalein, hum calculate kar denge 👇")
+    hcol, wcol = st.columns(2)
+    with hcol:
+        height_cm = st.number_input("Height (cm)", min_value=50.0, max_value=250.0, value=170.0, step=0.5)
+    with wcol:
+        weight_kg = st.number_input("Weight (kg)", min_value=10.0, max_value=300.0, value=65.0, step=0.5)
+
+    height_m = height_cm / 100
+    bmi = round(weight_kg / (height_m ** 2), 1) if height_m > 0 else 0.0
+    st.metric("Calculated BMI", f"{bmi}")
+
+col7, col8 = st.columns(2)
 with col7:
     hba1c = st.number_input("HbA1c Level", min_value=3.0, max_value=15.0, value=5.5, step=0.1)
 with col8:
